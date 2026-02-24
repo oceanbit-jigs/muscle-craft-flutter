@@ -602,6 +602,69 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   }) {
     return GestureDetector(
       onTap: onTap,
+      // child: Container(
+      //   width: 250,
+      //   height: 150,
+      //   decoration: BoxDecoration(
+      //     color: AppColors.card(context),
+      //     borderRadius: BorderRadius.circular(16),
+      //     border: Border.all(color: AppColors.border(context)),
+      //     image: DecorationImage(
+      //       image: NetworkImage(program['image']!),
+      //       fit: BoxFit.cover,
+      //       colorFilter: ColorFilter.mode(
+      //         AppColors.background(context).withValues(alpha: 0.4),
+      //         BlendMode.darken,
+      //       ),
+      //     ),
+      //   ),
+      //   padding: const EdgeInsets.all(12),
+      //   child: Column(
+      //     mainAxisAlignment: MainAxisAlignment.end,
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     children: [
+      //       Text(
+      //         program['title']!,
+      //         maxLines: 2,
+      //         overflow: TextOverflow.ellipsis,
+      //         style: TextStyle(
+      //           color: AppColors.text(context),
+      //           fontWeight: FontWeight.w500,
+      //           fontSize: 14,
+      //           height: 1.3,
+      //         ),
+      //       ),
+      //       const SizedBox(height: 6),
+      //       Row(
+      //         children: [
+      //           Text(
+      //             program['kcal']!,
+      //             style: TextStyle(
+      //               color: AppColors.subText(context),
+      //               fontSize: 12,
+      //             ),
+      //           ),
+      //           const SizedBox(width: 8),
+      //           Text(
+      //             '•',
+      //             style: TextStyle(
+      //               color: AppColors.subText(context).withValues(alpha: 0.6),
+      //               fontSize: 12,
+      //             ),
+      //           ),
+      //           const SizedBox(width: 8),
+      //           Text(
+      //             program['time']!,
+      //             style: TextStyle(
+      //               color: AppColors.subText(context),
+      //               fontSize: 12,
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //     ],
+      //   ),
+      // ),
       child: Container(
         width: 250,
         height: 150,
@@ -609,60 +672,70 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
           color: AppColors.card(context),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border(context)),
-          image: DecorationImage(
-            image: NetworkImage(program['image']!),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              AppColors.background(context).withValues(alpha: 0.4),
-              BlendMode.darken,
-            ),
-          ),
         ),
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              program['title']!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: AppColors.text(context),
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                height: 1.3,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(program['image']!, fit: BoxFit.cover),
+
+              Container(
+                color: AppColors.background(context).withValues(alpha: 0.4),
               ),
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Text(
-                  program['kcal']!,
-                  style: TextStyle(
-                    color: AppColors.subText(context),
-                    fontSize: 12,
-                  ),
+
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      program['title']!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.text(context),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Text(
+                          program['kcal']!,
+                          style: TextStyle(
+                            color: AppColors.subText(context),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            color: AppColors.subText(
+                              context,
+                            ).withValues(alpha: 0.6),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          program['time']!,
+                          style: TextStyle(
+                            color: AppColors.subText(context),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '•',
-                  style: TextStyle(
-                    color: AppColors.subText(context).withValues(alpha: 0.6),
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  program['time']!,
-                  style: TextStyle(
-                    color: AppColors.subText(context),
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

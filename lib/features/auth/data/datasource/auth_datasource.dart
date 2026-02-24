@@ -62,6 +62,9 @@ class RegisterDatasource extends BaseRegisterDatasource {
             .map((e) => e['error'].toString())
             .join('\n');
         throw ServerException(message: errorMessages);
+      } else if (data['error'] != null && data['error'] is String) {
+        final errorMessages = data['error'];
+        throw ServerException(message: errorMessages);
       } else if (data['message'] != null) {
         throw ServerException(message: data['message']);
       } else {
