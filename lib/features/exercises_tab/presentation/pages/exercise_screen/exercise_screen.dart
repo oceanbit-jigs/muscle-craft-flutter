@@ -187,7 +187,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         widgets.add(_exerciseCard(context, item));
                         cardCount++;
 
-                        if (cardCount % 5 == 0) {
+                        if (cardCount % 3 == 0) {
                           widgets.add(_buildAdWidget());
                         }
                       }

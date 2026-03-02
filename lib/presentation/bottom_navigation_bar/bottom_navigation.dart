@@ -167,7 +167,7 @@ class _FitnessProgramScreenState extends State<FitnessProgramScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (_bannerAd != null && _selectedIndex != 4)
+        if (_bannerAd != null && _selectedIndex != 4 && _selectedIndex != 2)
           Container(
             height: _bannerAd!.size.height.toDouble(),
             color: isDarkMode ?  Colors.black : Colors.white,

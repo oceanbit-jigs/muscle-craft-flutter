@@ -9,10 +9,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:html/parser.dart' as html_parser;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../../../../core/utils/api.dart';
 import '../../../../../local_database/onboarding_storage.dart';
 import '../../../../../theme/color/colors.dart';
+import '../../../../../utils/ad_helper.dart';
 import '../../../domain/model/workout_details_model.dart';
 import '../../../domain/model/workout_exercise_details_model.dart';
 
@@ -46,13 +48,26 @@ class _WorkoutDetailScreenState extends State<WorkoutProgramDetailScreen> {
   String _gender = "male";
   final Map<String, Uint8List> _thumbnailCache = {};
   final Map<String, Future<Uint8List?>> _thumbnailFutureCache = {};
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
     super.initState();
     _loadGender();
+    _loadInterstitialAd();
     final bloc = context.read<DashboardBloc>();
     bloc.add(FetchWorkoutDetailEvent(widget.workoutId));
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) => _interstitialAd = ad,
+        onAdFailedToLoad: (error) => _interstitialAd = null,
+      ),
+    );
   }
 
   Future<Uint8List?> _getThumbnail(String videoPath) {
@@ -93,6 +108,12 @@ class _WorkoutDetailScreenState extends State<WorkoutProgramDetailScreen> {
   String parseHtmlString(String htmlString) {
     final document = html_parser.parse(htmlString);
     return document.body?.text ?? '';
+  }
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -521,19 +542,47 @@ class _WorkoutDetailScreenState extends State<WorkoutProgramDetailScreen> {
                                             elevation: 0,
                                           ),
                                           onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    WorkoutCounterScreen(
-                                                      workoutId:
-                                                          workout.data.id,
-                                                      workoutName: workout
-                                                          .data
-                                                          .displayName,
+                                            if (_interstitialAd != null) {
+                                              _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+                                                onAdDismissedFullScreenContent: (ad) {
+                                                  ad.dispose();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => WorkoutCounterScreen(
+                                                        workoutId: workout.data.id,
+                                                        workoutName: workout.data.displayName,
+                                                      ),
                                                     ),
-                                              ),
-                                            );
+                                                  );
+                                                  _loadInterstitialAd();
+                                                },
+                                                onAdFailedToShowFullScreenContent: (ad, error) {
+                                                  ad.dispose();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) => WorkoutCounterScreen(
+                                                        workoutId: workout.data.id,
+                                                        workoutName: workout.data.displayName,
+                                                      ),
+                                                    ),
+                                                  );
+                                                  _loadInterstitialAd();
+                                                },
+                                              );
+                                              _interstitialAd!.show();
+                                            } else {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => WorkoutCounterScreen(
+                                                    workoutId: workout.data.id,
+                                                    workoutName: workout.data.displayName,
+                                                  ),
+                                                ),
+                                              );
+                                            }
                                           },
 
                                           child: Row(

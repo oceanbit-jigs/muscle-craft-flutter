@@ -7,10 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../../../../core/utils/api.dart';
 import '../../../../../local_database/onboarding_storage.dart';
 import '../../../../../theme/color/colors.dart';
+import '../../../../../utils/ad_helper.dart';
 import '../../../../exercises_tab/domain/model/exercise_model.dart';
 import '../../../../exercises_tab/presentation/bloc/exercise_bloc.dart';
 import '../exercise_counter_screen/exercise_counter_screen.dart';
@@ -37,15 +39,27 @@ class _WorkoutDetailScreenState extends State<FocusAreaExerciseScreen> {
   bool headerCollapsed = false;
   final Map<String, Future<Uint8List?>> _thumbnailFutureCache = {};
   String _gender = "male";
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
     super.initState();
-
+    _loadInterstitialAd();
     context.read<ExerciseBloc>().add(
       GetExercisesEvent(focusAreaId: widget.focusAreaId),
     );
     _loadGender();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) => _interstitialAd = ad,
+        onAdFailedToLoad: (error) => _interstitialAd = null,
+      ),
+    );
   }
 
   Future<void> _loadGender() async {
@@ -90,6 +104,12 @@ class _WorkoutDetailScreenState extends State<FocusAreaExerciseScreen> {
   String parseHtmlString(String htmlString) {
     final document = html_parser.parse(htmlString);
     return document.body?.text ?? '';
+  }
+
+  @override
+  void dispose() {
+    _interstitialAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -318,18 +338,47 @@ class _WorkoutDetailScreenState extends State<FocusAreaExerciseScreen> {
                                           elevation: 0,
                                         ),
                                         onPressed: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  ExerciseCounterScreen(
-                                                    focusAreaId:
-                                                        widget.focusAreaId,
-                                                    focusAreaName:
-                                                        widget.focusAreaName,
+                                          if (_interstitialAd != null) {
+                                            _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+                                              onAdDismissedFullScreenContent: (ad) {
+                                                ad.dispose();
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ExerciseCounterScreen(
+                                                      focusAreaId: widget.focusAreaId,
+                                                      focusAreaName: widget.focusAreaName,
+                                                    ),
                                                   ),
-                                            ),
-                                          );
+                                                );
+                                                _loadInterstitialAd();
+                                              },
+                                              onAdFailedToShowFullScreenContent: (ad, error) {
+                                                ad.dispose();
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ExerciseCounterScreen(
+                                                      focusAreaId: widget.focusAreaId,
+                                                      focusAreaName: widget.focusAreaName,
+                                                    ),
+                                                  ),
+                                                );
+                                                _loadInterstitialAd();
+                                              },
+                                            );
+                                            _interstitialAd!.show();
+                                          } else {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ExerciseCounterScreen(
+                                                  focusAreaId: widget.focusAreaId,
+                                                  focusAreaName: widget.focusAreaName,
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         },
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
