@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'features/auth/data/repository/auth_repository_impl.dart';
 import 'features/auth/presentation/pages/register_page.dart';
@@ -22,6 +23,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
   await initializeDependencies();
   // runApp(const MyApp());
 
@@ -54,82 +56,6 @@ void main() async {
     // ),
   );
 }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final themeProvider = Provider.of<ThemeProvider>(context);
-//     return MaterialApp(
-//       title: 'Fitness App',
-//       debugShowCheckedModeBanner: false,
-//       themeMode: themeProvider.currentTheme,
-//
-//       theme: ThemeData(
-//         fontFamily: "Poppins",
-//         brightness: Brightness.light,
-//         scaffoldBackgroundColor: Colors.white,
-//         colorScheme: const ColorScheme.light(secondary: Colors.black),
-//       ),
-//
-//       darkTheme: ThemeData(
-//         fontFamily: "Poppins",
-//         brightness: Brightness.dark,
-//         scaffoldBackgroundColor: Colors.black,
-//         colorScheme: const ColorScheme.dark(
-//           //  primary: Color(0xFFFFFF00),
-//           secondary: Colors.white,
-//         ),
-//         elevatedButtonTheme: ElevatedButtonThemeData(
-//           style: ElevatedButton.styleFrom(
-//             backgroundColor: Colors.white,
-//             foregroundColor: Colors.black,
-//             minimumSize: const Size(double.infinity, 50),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(30.0),
-//             ),
-//             textStyle: const TextStyle(
-//               fontSize: 18,
-//               fontWeight: FontWeight.bold,
-//             ),
-//           ),
-//         ),
-//         textButtonTheme: TextButtonThemeData(
-//           style: TextButton.styleFrom(
-//             backgroundColor: const Color.fromARGB(255, 30, 30, 30),
-//             foregroundColor: Colors.white,
-//             minimumSize: const Size(120, 80),
-//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-//             shape: RoundedRectangleBorder(
-//               borderRadius: BorderRadius.circular(15.0),
-//               side: BorderSide.none,
-//             ),
-//             textStyle: const TextStyle(
-//               fontSize: 18,
-//               fontWeight: FontWeight.w500,
-//             ),
-//           ),
-//         ),
-//         inputDecorationTheme: InputDecorationTheme(
-//           filled: true,
-//           fillColor: Colors.transparent,
-//           border: OutlineInputBorder(
-//             borderRadius: BorderRadius.circular(15.0),
-//             borderSide: BorderSide.none,
-//           ),
-//           //hintStyle: TextStyle(color: Colors.grey.shade600),
-//           contentPadding: const EdgeInsets.symmetric(
-//             horizontal: 20,
-//             vertical: 20,
-//           ),
-//         ),
-//       ),
-//       navigatorKey: navigatorKey,
-//       home: const OnboardingFlow(),
-//     );
-//   }
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -215,34 +141,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // elevatedButtonTheme: ElevatedButtonThemeData(
-        //   style: ElevatedButton.styleFrom(
-        //     backgroundColor: Colors.white,
-        //     foregroundColor: Colors.black,
-        //     minimumSize: const Size(double.infinity, 50),
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(30.0),
-        //     ),
-        //     textStyle: const TextStyle(
-        //       fontSize: 18,
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //   ),
-        // ),
-
-        // textButtonTheme: TextButtonThemeData(
-        //   style: TextButton.styleFrom(
-        //     backgroundColor: Color.fromARGB(255, 30, 30, 30),
-        //     foregroundColor: Colors.white,
-        //     minimumSize: Size(120, 80),
-        //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(15.0),
-        //       side: BorderSide.none,
-        //     ),
-        //     textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-        //   ),
-        // ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.transparent,

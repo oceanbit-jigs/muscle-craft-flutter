@@ -62,6 +62,7 @@ dependencies:
   video_thumbnail:
   share_plus:
   http_parser:
+  google_mobile_ads:
 
 dev_dependencies:
   flutter_test:

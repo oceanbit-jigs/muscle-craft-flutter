@@ -3,8 +3,10 @@ import 'package:fitness_workout_app/features/workout_tab/presentation/pages/work
 import 'package:fitness_workout_app/features/workout_tab/presentation/pages/workout_tab/workout_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../../theme/color/colors.dart';
+import '../../../../../theme_provider/theme_provider.dart';
 import '../../bloc/dashboard_bloc.dart';
 import 'focus_area_exercise_screen.dart';
 
@@ -438,11 +440,16 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   // }
 
   Widget _buildTargetCard(String title, String imagePath) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    bool isDarkMode =
+        themeProvider.currentTheme == ThemeMode.dark ||
+            (themeProvider.currentTheme == ThemeMode.system &&
+                MediaQuery.of(context).platformBrightness == Brightness.dark);
     return Container(
       width: 120,
       height: 140,
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
+        color: isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey),
       ),
@@ -488,15 +495,15 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                 ),
                 width: double.infinity,
                 alignment: Alignment.bottomCenter,
-                decoration: const BoxDecoration(
+                decoration:  BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black,
+                      color:isDarkMode ? Colors.black : Colors.white,
                       blurRadius: 10,
                       offset: Offset(-2, -15),
                     ),
                   ],
-                  color: Colors.black,
+                  color: isDarkMode ? Colors.black : Colors.white,
                 ),
               ),
             ),
@@ -506,8 +513,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               child: Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
+                style:  TextStyle(
+                  color:isDarkMode ? Colors.white : Colors.black,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

@@ -5,9 +5,11 @@ import 'package:fitness_workout_app/features/workout_tab/presentation/pages/work
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../../../../local_database/onboarding_storage.dart';
 import '../../../../../theme/color/colors.dart';
+import '../../../../../utils/ad_helper.dart';
 import '../../../domain/model/exercise_model.dart';
 import '../../bloc/exercise_bloc.dart';
 
@@ -23,15 +25,27 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   String _gender = "male";
   final Map<String, Uint8List> _thumbnailCache = {};
   final Map<String, Future<Uint8List?>> _thumbnailFutureCache = {};
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
     super.initState();
-
+    _loadInterstitialAd();
     context.read<ExerciseBloc>().add(GetExercisesEvent());
 
     _scrollController.addListener(_onScroll);
     _loadGender();
+  }
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) => _interstitialAd = ad,
+        onAdFailedToLoad: (error) => _interstitialAd = null,
+      ),
+    );
   }
 
   void _onScroll() {
@@ -150,23 +164,37 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 controller: _scrollController,
                 padding: const EdgeInsets.all(16),
                 children: [
-                  for (var letter in grouped.keys) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Text(
-                        letter,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.text(context),
+                  ...() {
+                    final widgets = <Widget>[];
+                    int cardCount = 0;
+
+                    for (var letter in grouped.keys) {
+                      widgets.add(
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Text(
+                            letter,
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.text(context),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
 
-                    for (var item in grouped[letter]!)
-                      _exerciseCard(context, item),
-                  ],
+                      for (var item in grouped[letter]!) {
+                        widgets.add(_exerciseCard(context, item));
+                        cardCount++;
 
+                        if (cardCount % 5 == 0) {
+                          widgets.add(_buildAdWidget());
+                        }
+                      }
+                    }
+
+                    return widgets;
+                  }(),
                   if (hasMore) _paginationLoader(),
                 ],
               ),
@@ -397,13 +425,38 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                VideoPage(exerciseId: model.id),
-                          ),
-                        );
+                        if (_interstitialAd != null) {
+                          _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+                            onAdDismissedFullScreenContent: (ad) {
+                              ad.dispose();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoPage(exerciseId: model.id),
+                                ),
+                              );
+                              _loadInterstitialAd();
+                            },
+                            onAdFailedToShowFullScreenContent: (ad, error) {
+                              ad.dispose();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoPage(exerciseId: model.id),
+                                ),
+                              );
+                              _loadInterstitialAd();
+                            },
+                          );
+                          _interstitialAd!.show();
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VideoPage(exerciseId: model.id),
+                            ),
+                          );
+                        }
                       },
                       child: CircleAvatar(
                         backgroundColor: AppColors.primary(context),
@@ -422,6 +475,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAdWidget() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      height: 60,
+      child: _AdBannerWidget(),
     );
   }
 
@@ -445,6 +506,47 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
+  }
+}
+
+class _AdBannerWidget extends StatefulWidget {
+  @override
+  State<_AdBannerWidget> createState() => _AdBannerWidgetState();
+}
+
+class _AdBannerWidgetState extends State<_AdBannerWidget> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _bannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) => setState(() {}),
+        onAdFailedToLoad: (ad, error) => ad.dispose(),
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_bannerAd != null) {
+      return SizedBox(
+        height: _bannerAd!.size.height.toDouble(),
+        child: AdWidget(ad: _bannerAd!),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

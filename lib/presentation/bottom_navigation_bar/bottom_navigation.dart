@@ -6,10 +6,12 @@ import 'package:fitness_workout_app/presentation/tab/tracking_tab/tracking_tab.d
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../features/exercises_tab/presentation/pages/exercise_screen/exercise_screen.dart';
 import '../../features/workout_tab/presentation/pages/workout_tab/featured_programs_screen.dart';
 import '../../theme_provider/theme_provider.dart';
+import '../../utils/ad_helper.dart';
 
 class FitnessProgramScreen extends StatefulWidget {
   const FitnessProgramScreen({super.key});
@@ -20,6 +22,31 @@ class FitnessProgramScreen extends StatefulWidget {
 
 class _FitnessProgramScreenState extends State<FitnessProgramScreen> {
   int _selectedIndex = 0;
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+  void _loadAd() {
+    _bannerAd = BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) => setState(() {}),
+        onAdFailedToLoad: (ad, error) => ad.dispose(),
+      ),
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,73 +156,84 @@ class _FitnessProgramScreenState extends State<FitnessProgramScreen> {
 
     Color? selectedColor = isDarkMode
         ? Colors.white
-        : Colors.black; // selected item
+        : Colors.black;
     Color? unselectedColor = isDarkMode
         ? Colors.white38
-        : Colors.grey; // unselected item
+        : Colors.grey;
     Color? backgroundColor = isDarkMode
         ? Colors.transparent
-        : Colors.white; // container bg
+        : Colors.white;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(30, 8, 30, Platform.isIOS ? 20 : 8),
-      decoration: BoxDecoration(
-        gradient: isDarkMode
-            ? const LinearGradient(
-                colors: [
-                  Color(0xff272727),
-                  Color(0xFF000000),
-                  Color(0xFF272727),
-                ],
-              )
-            : null,
-        color: !isDarkMode ? backgroundColor : null,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _BottomNavItem(
-            svgIcon: 'assets/icons/program.svg',
-            label: "Workout",
-            isActive: _selectedIndex == 0,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: () => setState(() => _selectedIndex = 0),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_bannerAd != null && _selectedIndex != 4)
+          Container(
+            height: _bannerAd!.size.height.toDouble(),
+            color: isDarkMode ?  Colors.black : Colors.white,
+            child: AdWidget(ad: _bannerAd!),
           ),
-          _BottomNavItem(
-            svgIcon: 'assets/icons/tracking.svg',
-            label: "Tracking",
-            isActive: _selectedIndex == 1,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: () => setState(() => _selectedIndex = 1),
+        Container(
+          padding: EdgeInsets.fromLTRB(30, 8, 30, Platform.isIOS ? 20 : 8),
+          decoration: BoxDecoration(
+            gradient: isDarkMode
+                ? const LinearGradient(
+                    colors: [
+                      Color(0xff272727),
+                      Color(0xFF000000),
+                      Color(0xFF272727),
+                    ],
+                  )
+                : null,
+            color: !isDarkMode ? backgroundColor : null,
           ),
-          _BottomNavItem(
-            svgIcon: 'assets/icons/program.svg',
-            label: "Exercises",
-            isActive: _selectedIndex == 2,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: () => setState(() => _selectedIndex = 2),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _BottomNavItem(
+                svgIcon: 'assets/icons/program.svg',
+                label: "Workout",
+                isActive: _selectedIndex == 0,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: () => setState(() => _selectedIndex = 0),
+              ),
+              _BottomNavItem(
+                svgIcon: 'assets/icons/tracking.svg',
+                label: "Tracking",
+                isActive: _selectedIndex == 1,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: () => setState(() => _selectedIndex = 1),
+              ),
+              _BottomNavItem(
+                svgIcon: 'assets/icons/program.svg',
+                label: "Exercises",
+                isActive: _selectedIndex == 2,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: () => setState(() => _selectedIndex = 2),
+              ),
+              _BottomNavItem(
+                svgIcon: 'assets/icons/toolbox.svg',
+                label: "Tools",
+                isActive: _selectedIndex == 3,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: () => setState(() => _selectedIndex = 3),
+              ),
+              _BottomNavItem(
+                svgIcon: 'assets/icons/profile.svg',
+                label: "Profile",
+                isActive: _selectedIndex == 4,
+                selectedColor: selectedColor,
+                unselectedColor: unselectedColor,
+                onTap: () => setState(() => _selectedIndex = 4),
+              ),
+            ],
           ),
-          _BottomNavItem(
-            svgIcon: 'assets/icons/toolbox.svg',
-            label: "Tools",
-            isActive: _selectedIndex == 3,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: () => setState(() => _selectedIndex = 3),
-          ),
-          _BottomNavItem(
-            svgIcon: 'assets/icons/profile.svg',
-            label: "Profile",
-            isActive: _selectedIndex == 4,
-            selectedColor: selectedColor,
-            unselectedColor: unselectedColor,
-            onTap: () => setState(() => _selectedIndex = 4),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
